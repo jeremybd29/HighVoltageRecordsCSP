@@ -2,6 +2,7 @@ package org.yearup.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.yearup.models.Category;
 import org.yearup.models.Product;
@@ -37,11 +38,16 @@ public CategoriesController(CategoryService categoryService, ProductService prod
         return categoryService.getAllCategories();
     }
 
-    // add the appropriate annotation for a get action
-    public Category getById(@PathVariable int id)
+    @GetMapping("/{id}")
+    public ResponseEntity<Category> getById(@PathVariable int id)
     {
-        // get the category by id
-        return null;
+        // find the category by id
+        Category category = categoryService.getById(id);
+        if (category == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(category);
+
     }
 
     // the url to return all products in category 1 would look like this
@@ -50,15 +56,16 @@ public CategoriesController(CategoryService categoryService, ProductService prod
     public List<Product> getProductsById(@PathVariable int categoryId)
     {
         // get a list of product by categoryId
-        return null;
+        return productService.listByCategoryId(categoryId);
     }
 
-    // add annotation to call this method for a POST action
-    // add annotation to ensure that only an ADMIN can call this function
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping
     public ResponseEntity<Category> addCategory(@RequestBody Category category)
     {
         // insert the category and return it with status 201 Created
-        return null;
+        Category createdCategory = categoryService.create(category);
+        return ResponseEntity.status(201).body(createdCategory);
     }
 
     // add annotation to call this method for a PUT (update) action - the url path must include the categoryId
