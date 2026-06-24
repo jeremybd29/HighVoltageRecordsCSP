@@ -1,8 +1,11 @@
 package org.yearup.service;
 
 import org.springframework.stereotype.Service;
+import org.yearup.models.Product;
 import org.yearup.models.ShoppingCart;
+import org.yearup.models.ShoppingCartItem;
 import org.yearup.repository.ShoppingCartRepository;
+
 
 @Service
 public class ShoppingCartService
@@ -19,8 +22,21 @@ public class ShoppingCartService
 
     public ShoppingCart getByUserId(int userId)
     {
+        ShoppingCart cart = new ShoppingCart();
+        var cartItems = shoppingCartRepository.findByUserId(userId);
+        for (var cartItem : cartItems)
+        {
+            Product product = productService.getById(cartItem.getProductId());
+            ShoppingCartItem item = new ShoppingCartItem();
+
+            item.setProduct(product);
+            item.setQuantity(cartItem.getQuantity());
+
+            cart.add(item);
+
+        }
         // load the user's cart rows, look up each product, and build the ShoppingCart
-        return null;
+        return cart;
     }
 
     // add additional methods here
